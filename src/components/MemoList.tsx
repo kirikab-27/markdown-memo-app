@@ -1,4 +1,5 @@
 import { Memo } from '../types/Memo';
+import { stripMarkdown } from '../utils/markdown';
 
 interface MemoListProps {
   memos: Memo[];
@@ -44,8 +45,12 @@ export default function MemoList({ memos, onSelectMemo, onDeleteMemo }: MemoList
                 </button>
               </div>
               <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                {memo.content.substring(0, 100)}
-                {memo.content.length > 100 && '...'}
+                {(() => {
+                  const strippedContent = stripMarkdown(memo.content);
+                  return strippedContent.length > 100 
+                    ? strippedContent.substring(0, 100) + '...'
+                    : strippedContent;
+                })()}
               </p>
               <div className="flex justify-between items-center text-xs text-gray-500">
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">

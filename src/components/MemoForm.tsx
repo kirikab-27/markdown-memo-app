@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Memo, MemoFormData } from '../types/Memo';
+import MarkdownPreview from './MarkdownPreview';
 
 interface MemoFormProps {
   memo?: Memo | null;
@@ -13,6 +14,7 @@ export default function MemoForm({ memo, onSave, onCancel }: MemoFormProps) {
     content: '',
     category: '',
   });
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
 
   useEffect(() => {
     if (memo) {
@@ -80,18 +82,55 @@ export default function MemoForm({ memo, onSave, onCancel }: MemoFormProps) {
         </div>
 
         <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
-            内容
-          </label>
-          <textarea
-            id="content"
-            value={formData.content}
-            onChange={(e) => handleChange('content', e.target.value)}
-            rows={10}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-            placeholder="メモの内容をマークダウン形式で入力"
-            required
-          />
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              内容
+            </label>
+            <div className="flex bg-gray-100 rounded-md p-1">
+              <button
+                type="button"
+                onClick={() => setActiveTab('edit')}
+                className={`px-3 py-1 text-sm rounded transition-colors ${
+                  activeTab === 'edit'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                編集
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('preview')}
+                className={`px-3 py-1 text-sm rounded transition-colors ${
+                  activeTab === 'preview'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                プレビュー
+              </button>
+            </div>
+          </div>
+          
+          {activeTab === 'edit' ? (
+            <textarea
+              id="content"
+              value={formData.content}
+              onChange={(e) => handleChange('content', e.target.value)}
+              rows={10}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+              placeholder="メモの内容をマークダウン形式で入力"
+              required
+            />
+          ) : (
+            <div className="w-full min-h-[250px] px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+              {formData.content ? (
+                <MarkdownPreview content={formData.content} />
+              ) : (
+                <p className="text-gray-500 italic">プレビューするには内容を入力してください</p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end space-x-3 pt-4">
