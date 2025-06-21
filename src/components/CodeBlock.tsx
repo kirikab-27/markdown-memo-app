@@ -1,24 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import Prism from 'prismjs';
-
-// Import languages
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-tsx';
-import 'prismjs/components/prism-python';
-import 'prismjs/components/prism-java';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-scss';
-import 'prismjs/components/prism-html';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-markdown';
-import 'prismjs/components/prism-bash';
-import 'prismjs/components/prism-yaml';
-import 'prismjs/components/prism-sql';
-
-// Import plugins
-import 'prismjs/plugins/line-numbers/prism-line-numbers';
+import { useState } from 'react';
+import { Highlight, themes } from 'prism-react-renderer';
 
 interface CodeBlockProps {
   code: string;
@@ -43,20 +24,22 @@ const languageNames: Record<string, string> = {
   markdown: 'Markdown',
   bash: 'Bash',
   sh: 'Shell',
+  shell: 'Shell',
   yaml: 'YAML',
   yml: 'YAML',
   sql: 'SQL',
+  c: 'C',
+  cpp: 'C++',
+  go: 'Go',
+  rust: 'Rust',
+  php: 'PHP',
+  ruby: 'Ruby',
+  kotlin: 'Kotlin',
+  swift: 'Swift',
 };
 
 export default function CodeBlock({ code, language = 'text' }: CodeBlockProps) {
-  const codeRef = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (codeRef.current) {
-      Prism.highlightElement(codeRef.current);
-    }
-  }, [code, language]);
 
   const handleCopy = async () => {
     try {
@@ -69,11 +52,10 @@ export default function CodeBlock({ code, language = 'text' }: CodeBlockProps) {
   };
 
   const displayLanguage = languageNames[language] || language.toUpperCase();
-  const prismLanguage = Prism.languages[language] ? language : 'text';
 
   return (
     <div className="relative group my-4">
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 border-b border-gray-700">
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-center px-4 py-2 bg-gray-800 border-b border-gray-700 z-10 rounded-t-lg">
         <span className="text-xs text-gray-400 font-medium">
           {displayLanguage}
         </span>
@@ -99,14 +81,35 @@ export default function CodeBlock({ code, language = 'text' }: CodeBlockProps) {
           )}
         </button>
       </div>
-      <pre className="!mt-0 !pt-12 !bg-gray-900 !rounded-lg overflow-hidden line-numbers">
-        <code
-          ref={codeRef}
-          className={`language-${prismLanguage}`}
-        >
-          {code.trim()}
-        </code>
-      </pre>
+      
+      <Highlight
+        theme={themes.vsDark}
+        code={code.trim()}
+        language={language}
+      >
+        {({ className, style, tokens, getLineProps, getTokenProps }) => (
+          <pre 
+            className={`${className} !mt-0 !pt-12 !pb-4 !rounded-lg overflow-x-auto`}
+            style={{
+              ...style,
+              backgroundColor: '#1e1e1e',
+            }}
+          >
+            {tokens.map((line, i) => (
+              <div key={i} {...getLineProps({ line })} className="table-row">
+                <span className="table-cell text-right pr-4 select-none text-gray-500 text-sm w-8">
+                  {i + 1}
+                </span>
+                <span className="table-cell">
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token })} />
+                  ))}
+                </span>
+              </div>
+            ))}
+          </pre>
+        )}
+      </Highlight>
     </div>
   );
 }

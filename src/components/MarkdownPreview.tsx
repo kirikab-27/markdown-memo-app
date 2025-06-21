@@ -36,10 +36,7 @@ export default function MarkdownPreview({ content, className = '' }: MarkdownPre
     
     // Cleanup function
     return () => {
-      const roots = containerRef.current?.querySelectorAll('[data-code-block]');
-      roots?.forEach((root) => {
-        // Clean up React roots if needed
-      });
+      // Clean up React roots if needed
     };
   }, [content]);
 

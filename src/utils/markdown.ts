@@ -20,7 +20,8 @@ marked.setOptions({
 
 export const parseMarkdown = (markdown: string): string => {
   try {
-    return marked(markdown);
+    const result = marked(markdown);
+    return typeof result === 'string' ? result : markdown;
   } catch (error) {
     console.error('Error parsing markdown:', error);
     return markdown;
