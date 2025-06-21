@@ -4,6 +4,119 @@
 このドキュメントは、マークダウンメモアプリプロジェクトのAI開発アシスタント用の完全な作業指示書です。
 過去の問題と解決策を蓄積し、将来の開発効率を向上させます。
 
+## 公式ドキュメント
+**Claude Code公式ドキュメント:** https://docs.anthropic.com/ja/docs/claude-code/overview
+
+## STEP0: Claude Code前提知識
+
+### Claude Codeの基本機能
+- **ターミナルベースのコーディングツール**で開発を加速
+- プロジェクト全体の構造を理解し、コンテキストを維持
+- 自然言語でのコマンド実行
+- ファイル編集、バグ修正、テスト実行、Git操作が可能
+
+### 基本コマンド
+```bash
+# 対話型セッション開始
+claude
+
+# ワンタイムクエリ実行
+claude -p "query"
+
+# 最新の会話を継続
+claude -c
+
+# アップデート
+claude update
+```
+
+### CLIフラグ
+```bash
+--add-dir          # 追加の作業ディレクトリを指定
+--print, -p        # 対話型モードなしで応答を表示
+--output-format    # 出力形式を指定 (text, json, stream-json)
+--verbose          # 詳細ログを有効化
+--model            # AIモデルを設定
+```
+
+### スラッシュコマンド
+```bash
+/bug               # バグ報告
+/clear             # 会話履歴をクリア
+/config            # 設定の表示・変更
+/memory            # CLAUDE.mdメモリファイルを編集
+/model             # AIモデルの選択・変更
+/permissions       # 権限の表示・更新
+/vim               # Vimライクキーバインディング
+```
+
+### 特別なショートカット
+- `#` でメモリに素早く追加
+- `\` または Option+Enter/Shift+Enter で複数行入力
+- 自然言語での複雑なタスク指示
+
+### 設定ファイル管理
+**設定の優先順位:**
+1. エンタープライズポリシー
+2. コマンドライン引数
+3. ローカルプロジェクト設定 (`.claude/settings.local.json`)
+4. 共有プロジェクト設定 (`.claude/settings.json`)
+5. ユーザー設定 (`~/.claude/settings.json`)
+
+**推奨設定ファイル構成:**
+```json
+// .claude/settings.json (チーム共有)
+{
+  "permissions": {
+    "allowedDirectories": ["src", "docs", ".ai"],
+    "allowedCommands": ["npm", "git", "lint"],
+    "requireApproval": ["rm", "sudo", "curl"]
+  },
+  "environment": {
+    "NODE_ENV": "development"
+  }
+}
+
+// .claude/settings.local.json (個人用、Git除外)
+{
+  "apiKey": "your-api-key",
+  "preferences": {
+    "outputFormat": "text",
+    "verbose": true
+  }
+}
+```
+
+### セキュリティとベストプラクティス
+**権限ベースアーキテクチャ:**
+- デフォルトで読み取り専用権限
+- ファイル編集やコマンド実行には明示的承認が必要
+- 開始ディレクトリとサブディレクトリのみアクセス可能
+
+**セキュリティ機能:**
+- プロンプトインジェクション保護
+- 危険なコマンドのブロック (`curl`, `wget`等)
+- コンテキスト認識による有害な指示の検出
+- ユーザー入力のサニタイズ
+
+**推奨セキュリティ設定:**
+1. センシティブなリポジトリでは厳格な権限設定
+2. 変更承認前の確認を徹底
+3. 定期的な権限設定の監査
+4. 追加分離が必要な場合はdevcontainerを使用
+
+### 開発ワークフローの最適化
+**効率的な使用方法:**
+- 関連するタスクはバッチで実行
+- `/memory`コマンドでプロジェクト知識を蓄積
+- `#`でクイックメモを活用
+- プロジェクト固有の設定で一貫性を保持
+
+**避けるべき事項:**
+- 未確認のファイル変更の一括承認
+- セキュリティ設定の無効化
+- 機密情報のプレーンテキスト保存
+
 ## 前提条件
 1. **必ず以下のドキュメントを参照してから作業を開始**
    - `.ai/troubleshooting.md` - 過去のエラーと解決策
@@ -348,8 +461,55 @@ server: {
 - 重要な決定は必ず記録する
 - エラーと解決策は即座に文書化
 
+## プロジェクト固有の設定
+
+### Claude Code設定ファイル
+プロジェクトには以下のClaude Code設定が適用されています：
+
+**`.claude/settings.json` (チーム共有設定):**
+- 許可ディレクトリ: `src`, `public`, `docs`, `.ai`, `dist`
+- 許可コマンド: `npm`, `npx`, `git`, `node`, `tsc`, `eslint`, `prettier`
+- 承認必須コマンド: `rm`, `sudo`, `curl`, `wget`, `chmod`, `chown`
+- 自動保存とLint on Save有効
+
+**個人設定 (`.claude/settings.local.json`):**
+```json
+{
+  "apiKey": "your-api-key",
+  "preferences": {
+    "outputFormat": "text",
+    "verbose": true,
+    "theme": "dark"
+  }
+}
+```
+
+### セキュリティ設定
+- **読み取り専用デフォルト:** ファイル変更には明示的承認が必要
+- **ディレクトリ制限:** プロジェクトディレクトリ内のみアクセス可能
+- **コマンド制限:** 危険なコマンドはブロックまたは承認必須
+
 ## コマンドリファレンス
 
+### Claude Codeコマンド
+```bash
+# 対話型セッション開始
+claude
+
+# プロジェクト設定確認
+claude -p "/config"
+
+# メモリファイル編集
+claude -p "/memory"
+
+# 権限確認
+claude -p "/permissions"
+
+# モデル変更
+claude -p "/model"
+```
+
+### 開発コマンド
 ```bash
 # 開発
 npm run dev
@@ -362,8 +522,10 @@ npm run lint
 
 # プレビュー
 npm run preview
+```
 
-# Git操作
+### Git操作
+```bash
 git add .
 git commit -m "feat: 機能説明"
 git push origin main
