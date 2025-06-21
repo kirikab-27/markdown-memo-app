@@ -3,3 +3,5 @@
 @tailwind utilities;
 
 @import './markdown.css';
+@import './prism-vscode-dark.css';
+@import 'prismjs/plugins/line-numbers/prism-line-numbers.css';

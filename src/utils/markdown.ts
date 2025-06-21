@@ -1,9 +1,21 @@
 import { marked } from 'marked';
 
+// Custom renderer for code blocks
+const renderer = new marked.Renderer();
+
+renderer.code = (code: string, language?: string) => {
+  const lang = language || 'text';
+  const id = `code-block-${Math.random().toString(36).substr(2, 9)}`;
+  
+  // Return a placeholder that will be replaced by React component
+  return `<div data-code-block="${id}" data-language="${lang}" data-code="${encodeURIComponent(code)}"></div>`;
+};
+
 // Configure marked options
 marked.setOptions({
   breaks: true,
   gfm: true,
+  renderer: renderer,
 });
 
 export const parseMarkdown = (markdown: string): string => {
